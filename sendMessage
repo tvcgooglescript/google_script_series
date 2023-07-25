@@ -1,0 +1,54 @@
+//API url: 
+//1. Send message: "https://api.telegram.org/bot" + token + "/sendMessage?text=" + encodeURIComponent(message) + "&chat_id=" + chatId + "&parse_mode=HTML";
+//2. Send image: "https://api.telegram.org/bot" + token + "/sendPhoto?caption=" + encodeURIComponent(caption) + "&chat_id=" + chatId + "&parse_mode=HTML";
+//3. Send Document: "https://api.telegram.org/bot" + token + "/sendDocument?chat_id=" + chatId + "&caption=" + encodeURIComponent(caption)
+//Telegram info
+var token = "6339377366:AAGj_xn8rhATL2AntOwsaw0DgM8eEKFh52M";
+var telegramUrl = "https://api.telegram.org/bot" + token;
+var chatId = "-1001456563703"
+//Sheet info
+var ss = SpreadsheetApp.getActiveSpreadsheet();
+var sh_sendMessage = ss.getSheetByName("Gửi tin nhắn")
+
+function sendNotify() {
+  var message = sh_sendMessage.getRange("A3").getValue()
+  console.log(message)
+  UrlFetchApp.fetch(telegramUrl + "/sendMessage?text=" + encodeURIComponent(message) + "&chat_id=" + chatId + "&parse_mode=HTML")
+}
+
+function sendNotifyV2() {
+  var message = sh_sendMessage.getRange("A3").getValue()
+  var countVl = sh_sendMessage.getRange("B1").getValue()
+  var groupList = sh_sendMessage.getRange("B3:C" + countVl).getValues();
+  console.log(groupList)
+  for (i = 0; i < groupList.length; i++) {
+    var name = groupList[i][0]
+    console.log(name + "  :DONE")
+    var grpId = groupList[i][1]
+    UrlFetchApp.fetch(telegramUrl + "/sendMessage?text=" + encodeURIComponent(message) + "&chat_id=" + grpId + "&parse_mode=HTML")
+  }
+}
+
+function getUpdateGrpInfo() {
+  var response = UrlFetchApp.fetch(telegramUrl + "/getUpdates");
+  var data = JSON.parse(response);
+  var sh_group = ss.getSheetByName('Group List');
+  var arrayData = [];
+  data.result.forEach(function (result) {
+    if (result.message) {
+      chatID = result.message.chat.id.toString();
+      if (result.message.chat.type == 'private') {
+        name = result.message.chat.first_name;
+      } else {
+        name = result.message.chat.title;
+      }
+      arrayData.push([name, chatID]);
+    } else if (result.my_chat_member) {
+      chatID = result.my_chat_member.chat.id.toString();
+      name = result.my_chat_member.chat.title;
+      arrayData.push([name, chatID]);
+    }
+  });
+  console.log("Array: ", arrayData);
+  sh_group.getRange(sh_group.getLastRow() + 1, 6, arrayData.length, 2).setValues(arrayData);
+}
