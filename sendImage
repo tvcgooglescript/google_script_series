@@ -1,0 +1,68 @@
+//API url: 
+//1. Send message: "https://api.telegram.org/bot" + token + "/sendMessage?text=" + encodeURIComponent(message) + "&chat_id=" + chatId + "&parse_mode=HTML";
+//2. Send image: "https://api.telegram.org/bot" + token + "/sendPhoto?caption=" + encodeURIComponent(caption) + "&chat_id=" + chatId + "&parse_mode=HTML";
+//3. Send Document: "https://api.telegram.org/bot" + token + "/sendDocument?chat_id=" + chatId + "&caption=" + encodeURIComponent(caption)
+//Telegram info
+var token = "6339377366:AAGj_xn8rhATL2AntOwsaw0DgM8eEKFh52M";
+var telegramUrl = "https://api.telegram.org/bot" + token;
+var chatId = "-1001456563703"
+//Sheet info
+var ss = SpreadsheetApp.getActiveSpreadsheet();
+var sh_sendMessage = ss.getSheetByName("Gửi tin nhắn")
+
+function sendOption() {
+  var option = sh_sendMessage.getRange("E1").getValue();
+  if (option == "Send message") {
+    sendNotify()
+  } else if (option == "Send image") {
+    sendImage()
+  } else if (option == "Send document") {
+    sendDocument()
+  }else{
+    console.log("Lựa chọn không tồn tại")
+  }
+}
+
+function sendImage() {
+  var caption = sh_sendMessage.getRange("A3").getValue()
+  var file = sh_sendMessage.getRange("A7").getValue().split("/")
+  console.log(file)
+  console.log(file[5])
+  var blob = DriveApp.getFileById(file[5]).getBlob();
+  var url = telegramUrl + "/sendPhoto?caption=" + encodeURIComponent(caption) + "&chat_id=" + chatId + "&parse_mode=HTML";
+  UrlFetchApp.fetch(url, { method: "post", payload: { photo: blob } })
+}
+
+function sendDocument() {
+  var caption = sh_sendMessage.getRange("A3").getValue()
+  var file = sh_sendMessage.getRange("A7").getValue().split("/")
+  console.log(file)
+  console.log(file[5])
+  var blob = DriveApp.getFileById(file[5]).getBlob();
+  var url = telegramUrl + "/sendDocument?chat_id=" + chatId + "&caption=" + encodeURIComponent(caption);
+  UrlFetchApp.fetch(url, { method: "post", payload: { document: blob } })
+}
+
+function getUpdateGrpInfo() {
+  var response = UrlFetchApp.fetch(telegramUrl + "/getUpdates");
+  var data = JSON.parse(response);
+  var sh_group = ss.getSheetByName('Group List');
+  var arrayData = [];
+  data.result.forEach(function (result) {
+    if (result.message) {
+      chatID = result.message.chat.id.toString();
+      if (result.message.chat.type == 'private') {
+        name = result.message.chat.first_name;
+      } else {
+        name = result.message.chat.title;
+      }
+      arrayData.push([name, chatID]);
+    } else if (result.my_chat_member) {
+      chatID = result.my_chat_member.chat.id.toString();
+      name = result.my_chat_member.chat.title;
+      arrayData.push([name, chatID]);
+    }
+  });
+  console.log("Array: ", arrayData);
+  sh_group.getRange(sh_group.getLastRow() + 1, 6, arrayData.length, 2).setValues(arrayData);
+}
