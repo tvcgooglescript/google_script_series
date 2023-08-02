@@ -1,0 +1,59 @@
+
+Tạo thư mục mới : Để tạo thư mục mới trong Google Drive, hãy sử dụng createFolder()phương thức của DriveApplớp.
+function createFolder(folderName) {
+  var folder = DriveApp.createFolder(folderName);
+  return folder;
+}
+Lấy thư mục theo tên : Bạn có thể lấy thư mục theo tên của nó bằng getFoldersByName()phương pháp.
+function getFolderByName(folderName) {
+  var folderIterator = DriveApp.getFoldersByName(folderName);
+  if (folderIterator.hasNext()) {
+    var folder = folderIterator.next();
+    return folder;
+  }
+  return null; // Folder not found
+}
+Lấy thư mục theo ID : Nếu bạn biết ID duy nhất của thư mục, bạn có thể lấy nó trực tiếp bằng getFolderById()phương pháp này.
+function getFolderById(folderId) {
+  var folder = DriveApp.getFolderById(folderId);
+  return folder;
+}
+Lấy các thư mục con của một thư mục mẹ : Để lấy tất cả các thư mục con của một thư mục mẹ, bạn có thể sử dụng getFolders()phương pháp.
+function getSubfolders(parentFolderId) {
+  var parentFolder = DriveApp.getFolderById(parentFolderId);
+  var subfolders = parentFolder.getFolders();
+  return subfolders;
+}
+Tạo thư mục con trong thư mục mẹ : Bạn có thể tạo thư mục con trong thư mục mẹ hiện có bằng cách sử dụng createFolder()phương pháp trên thư mục mẹ.
+function createSubfolder(parentFolderId, subfolderName) {
+  var parentFolder = DriveApp.getFolderById(parentFolderId);
+  var subfolder = parentFolder.createFolder(subfolderName);
+  return subfolder;
+}
+Di chuyển tệp vào thư mục : Bạn có thể di chuyển tệp vào thư mục bằng cách sử dụng addFile()phương pháp trên thư mục hoặc removeFile()phương pháp trên tệp.
+function moveFileToFolder(fileId, destinationFolderId) {
+  var file = DriveApp.getFileById(fileId);
+  var folder = DriveApp.getFolderById(destinationFolderId);
+  
+  folder.addFile(file);
+  // or file.moveTo(folder); // Another way to move the file to the folder
+  
+  // Optional: remove the file from the original folder
+  // DriveApp.getRootFolder().removeFile(file); 
+}
+Lặp qua các tệp và thư mục trong một thư mục : Để lặp qua tất cả các tệp và thư mục con trong một thư mục, hãy sử dụng các phương thức getFiles()và getFolders().
+function listFilesAndFolders(parentFolderId) {
+  var parentFolder = DriveApp.getFolderById(parentFolderId);
+  var files = parentFolder.getFiles();
+  var folders = parentFolder.getFolders();
+  
+  while (files.hasNext()) {
+    var file = files.next();
+    Logger.log('File Name: ' + file.getName());
+  }
+  
+  while (folders.hasNext()) {
+    var folder = folders.next();
+    Logger.log('Folder Name: ' + folder.getName());
+  }
+}
