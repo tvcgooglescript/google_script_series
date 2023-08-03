@@ -1,0 +1,42 @@
+//ref : https://stackoverflow.com/questions/38335143/export-single-sheet-to-pdf-in-apps-script
+
+var ss = SpreadsheetApp.getActiveSpreadsheet()
+var workSheet = ss.getSheetByName("XUẤT HÓA ĐƠN")
+
+function exportPDF() {
+  var folderName = workSheet.getRange("K3").getValue()
+  console.log(folderName)
+  var folderID = createFolder("1k1Qexz0p8926aRlkzKGhLrQbFca2Fm6A", folderName)
+  console.log(folderID)
+
+  var monthFolder = DriveApp.getFolderById(folderID)
+
+  var ss_id = ss.getId()
+  var url_pdf = "https://docs.google.com/spreadsheets/d/" + ss_id + "/" + "export?"
+    + 'export?exportFormat=pdf&format=pdf'   //export as pdf/ csv/ xls/ xlsx
+    + '&gid=' + workSheet.getSheetId()       //the sheet's Id
+    + '&size=a4'                             // Kích thước khổ giấy rộng x dài hoặc khổ giấy
+    + '&scale=4'                             // Căn chỉnh 1= Normal 100% / 2= Fit to width / 3= Fit to height / 4= Fit to Page
+    + '&range=' + "B1:I21"
+    + '&horizontal_alignment=CENTER'         // căn chỉnh ngang  LEFT/CENTER/RIGHT
+    + '&vertical_alignment=MIDDLE'           // căn chỉnh dọc    TOP/MIDDLE/BOTTOM
+    + '&gridlines=false&printnotes=false'    // Bỏ đường lưới và ghi chú
+    + '&top_margin=0.00'                     // Chỉnh lề trên
+    + '&bottom_margin=0.00'                  // Chỉnh lề dưới
+    + '&left_margin=0.00'                    // Chỉnh lề trái
+    + '&right_margin=0.00'                   // Chỉnh lề phải
+    + '&gridlines=false';                    // Ẩn hiện đường lưới true / false
+  var options = {
+    headers: {
+      'Authorization': 'Bearer ' + ScriptApp.getOAuthToken()
+    }
+  }
+  console.log(url_pdf, options)
+  var response = UrlFetchApp.fetch(url_pdf, options);
+
+  var blob = response.getBlob().setName(workSheet.getRange("L3").getValue())
+  var pfdFile = monthFolder.createFile(blob)
+  console.log(pfdFile.getId())
+
+  SpreadsheetApp.getUi().alert("HOÀN TẤT XUẤT PHIẾU! ")
+}
