@@ -1,0 +1,56 @@
+function sendMesss() {
+  console.log("Function này chạy lúc:  " + new Date().toLocaleString())
+}
+//Trigger trong 1 ngày giờ cố định 
+function setupTrigger1() {
+  var triggerDay = new Date();
+  triggerDay.setHours(8);  // Đặt giờ cố định là 8 giờ sáng
+  triggerDay.setMinutes(0);
+
+  ScriptApp.newTrigger('sendMesss')
+    .timeBased()
+    .at(triggerDay)
+    .create();
+}
+
+//============================================
+//Trigger theo thời gian giờ
+function function_2() {
+  Logger.log("Function executed!");
+}
+function setupTrigger2() {
+  ScriptApp.newTrigger('function_2')
+    .timeBased()
+    .everyHours(2) //2,4,6,8,12
+    .create();
+}
+
+//=============================================
+//Trigger theo thời gian phút
+function function_3() {
+  Logger.log("Function executed!");
+}
+function setupTrigger3() {
+  var sheet = SpreadsheetApp.getActive();
+  ScriptApp.newTrigger("function_3")
+    .timeBased()
+    .everyMinutes(30)
+    .create();
+}
+
+
+//==================================
+//Trigger theo ngày
+function function_4() {
+  Logger.log("Chức năng được thực hiện hàng ngày!");
+}
+function setupTrigger4() {
+  ScriptApp.newTrigger('function_4')
+    .timeBased()
+    .everyDays(1)  // Chạy mỗi ngày
+    .atHour(8)     // Vào lúc 8 giờ sáng (giờ địa phương)
+    .create();
+}
+
+
+
